@@ -104,7 +104,7 @@ if __name__ == "__main__":
     # print(test)
     df = test["df"]
 
-    perc_missing = calculate_perc_missing(df)
+    # perc_missing = calculate_perc_missing(df)
 
-    print("perc_missing: ", perc_missing)
-    # print(json.dumps(test["summary"], indent=2))
+    # print("perc_missing: ", perc_missing)
+    print(json.dumps(test["summary"], indent=2))
