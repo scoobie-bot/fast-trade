@@ -15,6 +15,7 @@ from fast_trade.update_symbol_data import load_archive_to_df, update_symbol_data
 from .run_backtest import run_backtest
 import matplotlib.pyplot as plt
 import datetime
+import os
 
 
 def parse_args(raw_args):
@@ -39,6 +40,9 @@ def parse_args(raw_args):
             arg_dict[arg_key] = True
 
     return arg_dict
+
+
+# import argparse
 
 
 def main():
@@ -103,11 +107,7 @@ def main():
 
         return
 
-    if command == "help":
-        print(format_all_help_text())
-        return
-
-    if command == "download":
+    elif command == "download":
         default_end = (
             datetime.datetime.utcnow() + datetime.timedelta(days=1)
         ).strftime("%Y-%m-%d")
@@ -115,14 +115,13 @@ def main():
         arc_path = args.get("archive", "./archive/")
         start_date = args.get("start", "2017-01-01")
         end_date = args.get("end", default_end)
-        exchange = args.get("exchange", "binance.com")
+        exchange = args.get("exchange", "binance.us")
         update_symbol_data(symbol, start_date, end_date, arc_path, exchange)
 
         print("Done downloading ", symbol)
         return
 
-    if command == "validate":
-        print("args: ", args)
+    elif command == "validate":
         backtest = open_strat_file(args["backtest"])
         if not backtest:
             print("backtest not found! ")
@@ -134,8 +133,35 @@ def main():
 
         print(json.dumps(res, indent=2))
         return
-    print("Command not found")
-    print(format_all_help_text())
+
+    elif command == "update_archive":
+        default_end_date = (
+            datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        ).strftime("%Y-%m-%d")
+        archive_path = args.get("archive", "./archive/")
+
+        if args.get("symbol", None):
+            symbol = args["symbol"]
+            update_symbol_data(symbol, "2017-01-01", default_end_date, archive_path)
+        else:
+            # read the archive and update the data
+            symbols_to_update = []
+            for archive in os.listdir(archive_path):
+                if archive.endswith("_meta.json"):
+                    symbol = archive.split("_meta.json").pop(0)
+                    symbols_to_update.append(symbol)
+
+            for symbol in symbols_to_update:
+                update_symbol_data(symbol, "2017-01-01", default_end_date, archive_path)
+    elif command == "help":
+        print(format_all_help_text())
+        return
+    else:
+        print(f"Invalid command: {command}. Run help for details")
+        return
+
+    # print("Command not found")
+    # print(format_all_help_text())
 
 
 if __name__ == "__main__":

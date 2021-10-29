@@ -221,6 +221,14 @@ Check out the file [update_symbol_data.py](/fast_trade/update_symbol_data.py) if
 
 `ft download --symbol=SYMBOL --exchange=EXCHANGE --start=START --end=END --archive=ARCHIVE`
 
+To keep it updated, you can run:
+`ft update_archive --archive=./archive`
+This will read the archive and update each symbols data with the most recent data. This will take a while, so its best to either run it frequently or down keep a large archive.
+
+You can also update a specific symbol passing it in:
+`ft update_archive --symbol=SYMBOL --archive=./archive`
+This will update only that symbols data.
+
 Defaults are:
 
 ```python

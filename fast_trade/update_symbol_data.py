@@ -52,7 +52,7 @@ import requests  # requires python-binance, not included in fast-trade package
 
 
 def update_symbol_data(
-    symbol, start_date, end_date="", arc_path="./archive", exchange="binance.us"
+    symbol, start_date, end_date=None, arc_path="./archive", exchange="binance.us"
 ):
     print(f"updating: {symbol}")
 
@@ -88,10 +88,14 @@ def update_symbol_data(
         end_date_dt = datetime.datetime.utcnow().replace(second=0, microsecond=0)
 
     DAYS_TO_INCREMENT = 30
+    MIN_WAIT_TIME = 0.1
+    MAX_WAIT_TIME = 0.5
     curr_date = start_date_dt
 
     while curr_date < end_date_dt:
         next_end_date = curr_date + datetime.timedelta(days=DAYS_TO_INCREMENT)
+        if next_end_date > datetime.datetime.utcnow():
+            next_end_date = datetime.datetime.utcnow().replace(second=0, microsecond=0)
         print(f"fetching klines for dates between {curr_date} and {next_end_date}")
 
         try:
@@ -112,7 +116,7 @@ def update_symbol_data(
                 print(
                     f"No data from {curr_date} to {next_end_date} for symbol {symbol} "
                 )
-                time.sleep(random.uniform(0.5, 1.3))
+                time.sleep(random.uniform(MIN_WAIT_TIME, MAX_WAIT_TIME))
 
         except Exception as e:
             print(f"Error updating symbol {symbol}\nError: ", e)
@@ -122,7 +126,7 @@ def update_symbol_data(
 
     update_symbol_meta(symbol, {"updating": False})
     # keep it slow to avoid rate limiting
-    time.sleep(random.uniform(0.5, 1.3))
+    time.sleep(random.uniform(MAX_WAIT_TIME, MAX_WAIT_TIME))
 
 
 def update_archive_csv_by_df(archive_csv_filename, new_df):
